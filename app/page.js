@@ -1,65 +1,123 @@
-import Image from "next/image";
+'use client';
+import React, { useState } from "react";
 
 export default function Home() {
+  const [city, setCity] = useState('')
+  const [weather, setWeather] = useState(null)
+
+  const weatherIcons = {
+    Clear: "/clear.png",
+    Clouds: "/cloud.png",
+    Drizzle: "/drizzle.png",
+    Rain: "/rain.png",
+    Snow: "/snow.png",
+  };
+  const handleChange = (e) => setCity(e.target.value)
+  const handleSearch = async () => {
+    if (city === '') return
+    const apikey = "fc4a03cd5f9710429a67f41f4411acbd"; // replace with your OpenWeatherMap key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apikey}`;
+    try {
+      const res = await fetch(url)
+      const data = await res.json()
+      if (data.cod === 200) {
+        setWeather({
+          name: data.name,
+          temp: Math.round(data.main.temp),
+          description: data.weather[0].description,
+          wind: data.wind.speed,
+          main: data.weather[0].main,
+          humidity: data.main.humidity,
+          feels: data.main.feels_like
+        })
+      } else {
+        alert('City not found' || data.message)
+        setWeather(null)
+      }
+    } catch (error) {
+      alert('Data fetching error')
+      setWeather(null)
+    }
+    setCity('')
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen flex items-center justify-center font-['Segoe_UI',sans-serif] bg-gradient-to-br from-[#0b1220] via-[#0f2a1f] to-[#1e4620]">
+      <div className="w-full max-w-[460px] rounded-2xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.4)] bg-white/10 backdrop-blur-xl border border-white/20">
+
+        {/* Title */}
+        <h1 className="text-[30px] font-semibold mb-5 text-white tracking-wide">
+          Weather
+          <span className="text-green-400">Now</span>
+        </h1>
+
+        {/* Search */}
+        <div className="flex gap-3">
+          <input
+            value={city}
+            onChange={handleChange}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            type="text"
+            placeholder="Search city"
+            className="flex-1 px-5 py-3 text-base rounded-full bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-full text-base transition shadow-lg shadow-green-500/30"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            GO
+          </button>
+        </div>
+
+        {/* Weather Card */}
+        {weather && (
+
+          <div className="mt-8 p-6 rounded-2xl bg-white/15 backdrop-blur-2xl border border-white/20 text-center animate-fadeIn hover:scale-[1.02] transition-transform duration-500">
+
+            <h2 className="text-2xl font-semibold text-white tracking-wide">{weather.name}</h2>
+
+            {/* Main Weather Icon */}
+            <img
+              src={weatherIcons[weather.main]}
+              alt={weather.description}
+              className="w-20 h-20 mx-auto mt-3"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+            <p className="text-[56px] font-bold text-green-400 mt-3 drop-shadow-lg">
+              {weather.temp}  °</p>
+            <p className="text-lg text-white/80 mt-1 capitalize"></p>
+
+            <div className="h-px w-full bg-white/20 my-6" />
+
+            {/* Weather Details with small icons */}
+            <div className="grid grid-cols-3 gap-4 text-white">
+
+              <div className="hover:text-green-400 transition flex flex-col items-center gap-1">
+                <p className="text-xs uppercase tracking-wider opacity-70">Humidity</p>
+                <div className="flex items-center gap-1">
+                  <img src="/humidity.png" alt="humidity" className="w-5 h-5" />
+                  <span className="text-lg font-semibold">{weather.humidity}</span>
+                </div>
+              </div>
+
+              <div className="hover:text-green-400 transition flex flex-col items-center gap-1">
+                <p className="text-xs uppercase tracking-wider opacity-70"></p>
+                <div className="flex items-center gap-1">
+                  <img src="/wind.png" alt="wind" className="w-5 h-5" />
+                  <span className="text-lg font-semibold">{weather.wind}km/h</span>
+                </div>
+              </div>
+
+              <div className="hover:text-green-400 transition flex flex-col items-center gap-1">
+                <p className="text-xs uppercase tracking-wider opacity-70">Feels</p>
+                <div className="flex items-center gap-1">
+                  <span className="text-lg font-semibold">{weather.feels}°</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
