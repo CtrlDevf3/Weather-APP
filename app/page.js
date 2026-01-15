@@ -15,7 +15,7 @@ export default function Home() {
   const handleChange = (e) => setCity(e.target.value)
   const handleSearch = async () => {
     if (city === '') return
-    const apikey = "fc4a03cd5f9710429a67f41f4411acbd"; // replace with your OpenWeatherMap key
+    const apikey = ""; // replace with your OpenWeatherMap key
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apikey}`;
     try {
       const res = await fetch(url)
